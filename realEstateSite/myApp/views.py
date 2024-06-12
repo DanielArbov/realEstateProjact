@@ -19,13 +19,7 @@ def Home_new(request):
 
 
 def home(request):
-    num_customers = Customer.objects.count()
-    num_professionals = Professional.objects.count()
-    count_users = num_customers + num_professionals
-    num_jobs = JobDetail.objects.count()
-
-    return render(request, 'home.html', {'count_users': count_users,
-                                         'num_jobs': num_jobs})
+    return render(request, 'home.html')
 
 
 def customer_register(request):
