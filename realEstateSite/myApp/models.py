@@ -1,5 +1,5 @@
 from enum import Enum
-
+from decimal import Decimal
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, AbstractUser
 from django.db import models
 from django.utils import timezone
@@ -61,6 +61,20 @@ class Professional(AbstractBaseUser):
         self.number_of_jobs += 1
         self.save()
 
+    def money_for_pro(self, budget, listOfSp):
+        for pro in listOfSp:
+            if self.specialization == pro:
+                index = listOfSp.index(pro)
+                if index == 0:
+                    return budget * Decimal('0.5')
+                elif index == 1:
+                    return budget * Decimal('0.3')
+                elif index == 2:
+                    return budget * Decimal('0.1')
+                elif index == 3:
+                    return budget * Decimal('0.1')
+        return Decimal('0')
+
 
 class Question(models.Model):
     question_text = models.CharField(max_length=255)
@@ -98,6 +112,16 @@ class JobDetail(models.Model):
             self.project_ended = False
         self.save()
 
+    def determine_professional_priority(self, total_score):
+        if total_score > 75:
+            return ['CONTRACTOR', 'ARCHITECT', 'SUPERVISOR', 'DESIGNER']
+        elif 50 < total_score <= 75:
+            return ['ARCHITECT', 'CONTRACTOR', 'SUPERVISOR', 'DESIGNER']
+        elif 30 < total_score <= 50:
+            return ['SUPERVISOR', 'ARCHITECT', 'CONTRACTOR', 'DESIGNER']
+        else:
+            return ['DESIGNER', 'SUPERVISOR', 'ARCHITECT', 'CONTRACTOR']
+
 
 class AnswerJob(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, default=1)
@@ -111,5 +135,6 @@ class JobApproval(models.Model):
     job_detail = models.ForeignKey(JobDetail, on_delete=models.CASCADE)
     professional = models.ForeignKey('Professional', on_delete=models.CASCADE)
     approved = models.BooleanField(default=False)
-
+    salary = models.DecimalField(max_digits=10, decimal_places=2)
+    contract_approved = models.BooleanField(default=False)
     objects = models.Manager()
